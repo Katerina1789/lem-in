@@ -63,10 +63,8 @@ Each phase is **gated** — the next phase cannot begin until the current phase 
 ---
 
 ## Communication Protocol
-
-- All agents commit to feature branches: `feat/<agent>-<task>`
 - PRs must pass `go vet`, `golint`, and all existing tests
-- A0 reviews and merges
+- A0 reviews only and infroms for approval  by the user
 - Shared data structures live in `pkg/models/` and are **immutable** after Phase 3
 
 ---

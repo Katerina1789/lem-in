@@ -1,6 +1,8 @@
-# AI Log - Pathfinder & Scheduler Implementation
+# AI Log 
 
-## Conversation Prompts & Actions
+## Pathfinder & Scheduler Implementation (phase 4 and 5)
+
+### Conversation Prompts & Actions
 
 1. **(mvidema)**: "you must implement the docs/phases/phase4.md and docs/phases/phase5.md without having phase 3 done can you do that ?"
    * **Action/Response**: Explored project context, confirmed technical feasibility using stubs and mocked flow graphs, and discussed gating constraints in `AGENTS.md`.

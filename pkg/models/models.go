@@ -51,3 +51,29 @@ type Turn []TurnMove
 type Solution struct {
 	Turns []Turn
 }
+
+// FlowGraph represents the split-node graph used for pathfinding
+type FlowGraph struct {
+	Nodes map[string]*FlowNode
+	Start *FlowNode
+	End   *FlowNode
+}
+
+// FlowNode represents a split node (in/out) or start/end node
+type FlowNode struct {
+	Name     string
+	Original string      // original room name
+	IsIn     bool        // true if this is R_in
+	IsOut    bool        // true if this is R_out
+	Edges    []*FlowEdge // outgoing edges
+}
+
+// FlowEdge represents a directed edge in the flow graph
+type FlowEdge struct {
+	From     *FlowNode
+	To       *FlowNode
+	Capacity int
+	Flow     int
+	Reverse  *FlowEdge // pointer to the reverse edge in the residual graph
+}
+

@@ -1,0 +1,135 @@
+package scheduler
+
+import (
+	"lem-in/pkg/models"
+	"sort"
+)
+
+func Simulate(ants []*models.Ant, graph *models.Graph) []models.Turn {
+	var turns []models.Turn
+
+	for {
+		allArrived := true
+		for _, ant := range ants {
+			if !ant.Arrived {
+				allArrived = false
+				break
+			}
+		}
+		if allArrived {
+			break
+		}
+
+		currentTurn := models.Turn{}
+		roomOccupied := make(map[string]bool)
+		for _, ant := range ants {
+			if !ant.Arrived && ant.Position >= 0 {
+				currRoom := ant.Path[ant.Position]
+				if currRoom != ant.Path[len(ant.Path)-1] {
+					roomOccupied[currRoom] = true
+				}
+			}
+		}
+
+		var pathList [][]string
+		for _, ant := range ants {
+			found := false
+			for _, p := range pathList {
+				if equalPaths(p, ant.Path) {
+					found = true
+					break
+				}
+			}
+			if !found {
+				pathList = append(pathList, ant.Path)
+			}
+		}
+
+		for _, path := range pathList {
+			var pathAnts []*models.Ant
+			for _, ant := range ants {
+				if equalPaths(ant.Path, path) {
+					pathAnts = append(pathAnts, ant)
+				}
+			}
+
+			sort.Slice(pathAnts, func(i, j int) bool {
+				return pathAnts[i].Position > pathAnts[j].Position
+			})
+
+			for i := 0; i < len(pathAnts); i++ {
+				ant := pathAnts[i]
+				if ant.Arrived || ant.Position == -1 {
+					continue
+				}
+
+				nextPos := ant.Position + 1
+				nextRoom := ant.Path[nextPos]
+				isEnd := nextPos == len(ant.Path)-1
+
+				if isEnd || !roomOccupied[nextRoom] {
+					currRoom := ant.Path[ant.Position]
+					delete(roomOccupied, currRoom)
+
+					ant.Position = nextPos
+					if isEnd {
+						ant.Arrived = true
+					} else {
+						roomOccupied[nextRoom] = true
+					}
+
+					currentTurn = append(currentTurn, models.TurnMove{
+						AntID: ant.ID,
+						Room:  nextRoom,
+					})
+				}
+			}
+
+			firstRoom := path[0]
+			isFirstRoomEnd := len(path) == 1
+			if isFirstRoomEnd || !roomOccupied[firstRoom] {
+				var inactiveAnt *models.Ant
+				for _, ant := range pathAnts {
+					if ant.Position == -1 {
+						inactiveAnt = ant
+						break
+					}
+				}
+
+				if inactiveAnt != nil {
+					inactiveAnt.Position = 0
+					if isFirstRoomEnd {
+						inactiveAnt.Arrived = true
+					} else {
+						roomOccupied[firstRoom] = true
+					}
+
+					currentTurn = append(currentTurn, models.TurnMove{
+						AntID: inactiveAnt.ID,
+						Room:  firstRoom,
+					})
+				}
+			}
+		}
+
+		if len(currentTurn) > 0 {
+			turns = append(turns, currentTurn)
+		} else {
+			break
+		}
+	}
+
+	return turns
+}
+
+func equalPaths(a, b []string) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i := range a {
+		if a[i] != b[i] {
+			return false
+		}
+	}
+	return true
+}

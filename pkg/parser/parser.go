@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-// ReadFile reads the entire file and returns its contents as a string.
+// ReadFile reads the entire file and returns its content as a string
 func ReadFile(path string) (string, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
@@ -14,38 +14,34 @@ func ReadFile(path string) (string, error) {
 	return string(data), nil
 }
 
-// SplitLines splits the raw string by newlines and removes carriage returns.
+// SplitLines splits raw content by \n and trims \r (handles Windows line endings)
 func SplitLines(raw string) []string {
-	// Split by \n
 	lines := strings.Split(raw, "\n")
-	// Trim \r from each line
 	for i := range lines {
-		lines[i] = strings.TrimSuffix(lines[i], "\r")
+		lines[i] = strings.TrimRight(lines[i], "\r")
 	}
 	return lines
 }
 
-// FilterComments removes lines starting with '#' that are NOT '##start' or '##end'.
-// Lines starting with '##' that are not '##start' or '##end' are also ignored.
+// FilterComments removes lines starting with # (except ##start and ##end)
+// Also removes lines starting with ## that are not ##start or ##end (treated as comments)
 func FilterComments(lines []string) []string {
 	var result []string
 	for _, line := range lines {
-		trimmed := strings.TrimLeft(line, " \t")
-		// Keep lines that don't start with '#'
-		if !strings.HasPrefix(trimmed, "#") {
+		// Keep ##start and ##end
+		if line == "##start" || line == "##end" {
 			result = append(result, line)
+		} else if strings.HasPrefix(line, "#") {
+			// Skip all other # lines (comments)
 			continue
-		}
-		// If it starts with '#', only keep ##start or ##end
-		if trimmed == "##start" || trimmed == "##end" {
+		} else {
 			result = append(result, line)
 		}
-		// Otherwise, skip it (it's a comment)
 	}
 	return result
 }
 
-// TrimWhitespace trims leading/trailing whitespace from each line and removes empty lines.
+// TrimWhitespace trims leading/trailing spaces from each line and removes empty lines
 func TrimWhitespace(lines []string) []string {
 	var result []string
 	for _, line := range lines {

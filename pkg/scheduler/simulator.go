@@ -35,30 +35,8 @@ func Simulate(ants []*models.Ant, graph *models.Graph) []models.Turn {
 			activeMoves := moveActiveAnts(pathAnts, roomOccupied)
 			currentTurn = append(currentTurn, activeMoves...)
 
-			firstRoom := path[0]
-			isFirstRoomEnd := len(path) == 1
-			if isFirstRoomEnd || !roomOccupied[firstRoom] {
-				var inactiveAnt *models.Ant
-				for _, ant := range pathAnts {
-					if ant.Position == -1 {
-						inactiveAnt = ant
-						break
-					}
-				}
-
-				if inactiveAnt != nil {
-					inactiveAnt.Position = 0
-					if isFirstRoomEnd {
-						inactiveAnt.Arrived = true
-					} else {
-						roomOccupied[firstRoom] = true
-					}
-
-					currentTurn = append(currentTurn, models.TurnMove{
-						AntID: inactiveAnt.ID,
-						Room:  firstRoom,
-					})
-				}
+			if launchMove := launchNewAnt(pathAnts, path, roomOccupied); launchMove != nil {
+				currentTurn = append(currentTurn, *launchMove)
 			}
 		}
 
@@ -166,4 +144,33 @@ func moveActiveAnts(pathAnts []*models.Ant, roomOccupied map[string]bool) []mode
 		}
 	}
 	return moves
+}
+
+func launchNewAnt(pathAnts []*models.Ant, path []string, roomOccupied map[string]bool) *models.TurnMove {
+	firstRoom := path[0]
+	isFirstRoomEnd := len(path) == 1
+	if isFirstRoomEnd || !roomOccupied[firstRoom] {
+		var inactiveAnt *models.Ant
+		for _, ant := range pathAnts {
+			if ant.Position == -1 {
+				inactiveAnt = ant
+				break
+			}
+		}
+
+		if inactiveAnt != nil {
+			inactiveAnt.Position = 0
+			if isFirstRoomEnd {
+				inactiveAnt.Arrived = true
+			} else {
+				roomOccupied[firstRoom] = true
+			}
+
+			return &models.TurnMove{
+				AntID: inactiveAnt.ID,
+				Room:  firstRoom,
+			}
+		}
+	}
+	return nil
 }

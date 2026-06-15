@@ -1,8 +1,13 @@
+/*
+Package pathfinder implements the BFS algorithm to find the shortest path in a flow graph.
+*/
+
 package pathfinder
 
 import "lem-in/pkg/models"
 
 func FindShortestPath(g *models.FlowGraph, startName, endName string) []*models.FlowEdge {
+	// retrieves the start and end nodes
 	startNode := g.Nodes[startName]
 	endNode := g.Nodes[endName]
 	if startNode == nil || endNode == nil {

@@ -33,24 +33,27 @@ func DistributeAnts(paths [][]string, numAnts int) []*models.Ant {
 	}
 
 	var ants []*models.Ant
-	antID := 1
-	for p, count := range paths {
-		_ = count // suppress unused variable warning
-		subPath := paths[p][1:]
-		for c := 0; c < assignedCounts[p]; c++ {
-			ants = append(ants, &models.Ant{
-				ID:       antID,
-				Path:     subPath,
-				Position: -1,
-				Arrived:  false,
-			})
-			antID++
-		}
+	for i := 1; i <= numAnts; i++ {
+		ants = append(ants, &models.Ant{
+			ID:       i,
+			Position: -1,
+			Arrived:  false,
+		})
 	}
 
-	sort.Slice(ants, func(i, j int) bool {
-		return ants[i].ID < ants[j].ID
-	})
+	antIdx := 0
+	for antIdx < numAnts {
+		for p := range paths {
+			if assignedCounts[p] > 0 {
+				ants[antIdx].Path = paths[p][1:]
+				assignedCounts[p]--
+				antIdx++
+				if antIdx >= numAnts {
+					break
+				}
+			}
+		}
+	}
 
 	return ants
 }

@@ -41,6 +41,9 @@ func Simulate(ants []*models.Ant, graph *models.Graph) []models.Turn {
 		}
 
 		if len(currentTurn) > 0 {
+			sort.Slice(currentTurn, func(i, j int) bool {
+				return currentTurn[i].AntID < currentTurn[j].AntID
+			})
 			turns = append(turns, currentTurn)
 		} else {
 			break

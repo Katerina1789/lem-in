@@ -30,16 +30,7 @@ func Simulate(ants []*models.Ant, graph *models.Graph) []models.Turn {
 		pathList := getUniquePaths(ants)
 
 		for _, path := range pathList {
-			var pathAnts []*models.Ant
-			for _, ant := range ants {
-				if equalPaths(ant.Path, path) {
-					pathAnts = append(pathAnts, ant)
-				}
-			}
-
-			sort.Slice(pathAnts, func(i, j int) bool {
-				return pathAnts[i].Position > pathAnts[j].Position
-			})
+			pathAnts := getSortedAntsOnPath(ants, path)
 
 			for i := 0; i < len(pathAnts); i++ {
 				ant := pathAnts[i]
@@ -155,4 +146,17 @@ func getUniquePaths(ants []*models.Ant) [][]string {
 		}
 	}
 	return pathList
+}
+
+func getSortedAntsOnPath(ants []*models.Ant, path []string) []*models.Ant {
+	var pathAnts []*models.Ant
+	for _, ant := range ants {
+		if equalPaths(ant.Path, path) {
+			pathAnts = append(pathAnts, ant)
+		}
+	}
+	sort.Slice(pathAnts, func(i, j int) bool {
+		return pathAnts[i].Position > pathAnts[j].Position
+	})
+	return pathAnts
 }

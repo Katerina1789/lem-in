@@ -4,7 +4,11 @@ import (
 	"fmt"
 	"os"
 
+	"lem-in/pkg/graph"
+	"lem-in/pkg/output"
 	"lem-in/pkg/parser"
+	"lem-in/pkg/pathfinder"
+	"lem-in/pkg/scheduler"
 	"lem-in/pkg/validator"
 )
 
@@ -20,7 +24,6 @@ func main() {
 	raw, err := parser.ReadFile(path)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "ERROR: invalid data format")
-		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 
@@ -29,14 +32,41 @@ func main() {
 	lines = parser.TrimWhitespace(lines)
 
 	// Phase 2: Validate
-	graph, antCount, err := validator.Validate(lines)
+	g, antCount, err := validator.Validate(lines)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "ERROR: invalid data format")
-		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 
-	// For now, just acknowledge success (Phase 3+ will build on this)
-	_ = graph
-	_ = antCount
+	// Verify connectivity
+	var startName, endName string
+	for name, room := range g.Rooms {
+		if room.IsStart {
+			startName = name
+		}
+		if room.IsEnd {
+			endName = name
+		}
+	}
+	if !graph.IsConnected(g, startName, endName) {
+		fmt.Fprintln(os.Stderr, "ERROR: invalid data format")
+		os.Exit(1)
+	}
+
+	// Phase 3 & 4: Pathfinding on split flow graph
+	flowGraph := graph.SplitForFlow(g)
+	allPaths := pathfinder.FindAllDisjointPaths(flowGraph)
+	optimalPaths := pathfinder.SelectOptimalPaths(allPaths, antCount)
+	if len(optimalPaths) == 0 {
+		fmt.Fprintln(os.Stderr, "ERROR: invalid data format")
+		os.Exit(1)
+	}
+
+	// Phase 5: Distribution and simulation
+	ants := scheduler.DistributeAnts(optimalPaths, antCount)
+	turns := scheduler.Simulate(ants, g)
+
+	// Phase 6: Formatting and output
+	formatted := output.FormatFull(raw, turns)
+	fmt.Print(formatted)
 }

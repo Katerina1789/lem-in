@@ -1,3 +1,7 @@
+/*
+Package scheduler implements the distributor algorithm to distribute ants across paths.
+*/
+
 package scheduler
 
 import (

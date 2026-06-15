@@ -5,18 +5,22 @@ import (
 	"sort"
 )
 
+/*Simulate distributes ants across paths and simulates the movement of ants.
+
+	Args:
+		ants: A slice of pointers to Ant structs representing the ants to be distributed.
+		graph: A pointer to a Graph struct representing the graph.
+
+	Returns:
+
+	A slice of Turn structs representing the turns taken by the ants.
+*/
+
 func Simulate(ants []*models.Ant, graph *models.Graph) []models.Turn {
 	var turns []models.Turn
 
 	for {
-		allArrived := true
-		for _, ant := range ants {
-			if !ant.Arrived {
-				allArrived = false
-				break
-			}
-		}
-		if allArrived {
+		if allAntsArrived(ants) {
 			break
 		}
 
@@ -128,6 +132,15 @@ func equalPaths(a, b []string) bool {
 	}
 	for i := range a {
 		if a[i] != b[i] {
+			return false
+		}
+	}
+	return true
+}
+
+func allAntsArrived(ants []*models.Ant) bool {
+	for _, ant := range ants {
+		if !ant.Arrived {
 			return false
 		}
 	}

@@ -32,33 +32,8 @@ func Simulate(ants []*models.Ant, graph *models.Graph) []models.Turn {
 		for _, path := range pathList {
 			pathAnts := getSortedAntsOnPath(ants, path)
 
-			for i := 0; i < len(pathAnts); i++ {
-				ant := pathAnts[i]
-				if ant.Arrived || ant.Position == -1 {
-					continue
-				}
-
-				nextPos := ant.Position + 1
-				nextRoom := ant.Path[nextPos]
-				isEnd := nextPos == len(ant.Path)-1
-
-				if isEnd || !roomOccupied[nextRoom] {
-					currRoom := ant.Path[ant.Position]
-					delete(roomOccupied, currRoom)
-
-					ant.Position = nextPos
-					if isEnd {
-						ant.Arrived = true
-					} else {
-						roomOccupied[nextRoom] = true
-					}
-
-					currentTurn = append(currentTurn, models.TurnMove{
-						AntID: ant.ID,
-						Room:  nextRoom,
-					})
-				}
-			}
+			activeMoves := moveActiveAnts(pathAnts, roomOccupied)
+			currentTurn = append(currentTurn, activeMoves...)
 
 			firstRoom := path[0]
 			isFirstRoomEnd := len(path) == 1
@@ -159,4 +134,36 @@ func getSortedAntsOnPath(ants []*models.Ant, path []string) []*models.Ant {
 		return pathAnts[i].Position > pathAnts[j].Position
 	})
 	return pathAnts
+}
+
+func moveActiveAnts(pathAnts []*models.Ant, roomOccupied map[string]bool) []models.TurnMove {
+	var moves []models.TurnMove
+	for i := 0; i < len(pathAnts); i++ {
+		ant := pathAnts[i]
+		if ant.Arrived || ant.Position == -1 {
+			continue
+		}
+
+		nextPos := ant.Position + 1
+		nextRoom := ant.Path[nextPos]
+		isEnd := nextPos == len(ant.Path)-1
+
+		if isEnd || !roomOccupied[nextRoom] {
+			currRoom := ant.Path[ant.Position]
+			delete(roomOccupied, currRoom)
+
+			ant.Position = nextPos
+			if isEnd {
+				ant.Arrived = true
+			} else {
+				roomOccupied[nextRoom] = true
+			}
+
+			moves = append(moves, models.TurnMove{
+				AntID: ant.ID,
+				Room:  nextRoom,
+			})
+		}
+	}
+	return moves
 }

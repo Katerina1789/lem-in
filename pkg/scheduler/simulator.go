@@ -27,19 +27,7 @@ func Simulate(ants []*models.Ant, graph *models.Graph) []models.Turn {
 		currentTurn := models.Turn{}
 		roomOccupied := getOccupiedRooms(ants)
 
-		var pathList [][]string
-		for _, ant := range ants {
-			found := false
-			for _, p := range pathList {
-				if equalPaths(p, ant.Path) {
-					found = true
-					break
-				}
-			}
-			if !found {
-				pathList = append(pathList, ant.Path)
-			}
-		}
+		pathList := getUniquePaths(ants)
 
 		for _, path := range pathList {
 			var pathAnts []*models.Ant
@@ -150,4 +138,21 @@ func getOccupiedRooms(ants []*models.Ant) map[string]bool {
 		}
 	}
 	return roomOccupied
+}
+
+func getUniquePaths(ants []*models.Ant) [][]string {
+	var pathList [][]string
+	for _, ant := range ants {
+		found := false
+		for _, p := range pathList {
+			if equalPaths(p, ant.Path) {
+				found = true
+				break
+			}
+		}
+		if !found {
+			pathList = append(pathList, ant.Path)
+		}
+	}
+	return pathList
 }

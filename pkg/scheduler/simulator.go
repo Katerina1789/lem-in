@@ -25,15 +25,7 @@ func Simulate(ants []*models.Ant, graph *models.Graph) []models.Turn {
 		}
 
 		currentTurn := models.Turn{}
-		roomOccupied := make(map[string]bool)
-		for _, ant := range ants {
-			if !ant.Arrived && ant.Position >= 0 {
-				currRoom := ant.Path[ant.Position]
-				if currRoom != ant.Path[len(ant.Path)-1] {
-					roomOccupied[currRoom] = true
-				}
-			}
-		}
+		roomOccupied := getOccupiedRooms(ants)
 
 		var pathList [][]string
 		for _, ant := range ants {
@@ -145,4 +137,17 @@ func allAntsArrived(ants []*models.Ant) bool {
 		}
 	}
 	return true
+}
+
+func getOccupiedRooms(ants []*models.Ant) map[string]bool {
+	roomOccupied := make(map[string]bool)
+	for _, ant := range ants {
+		if !ant.Arrived && ant.Position >= 0 {
+			currRoom := ant.Path[ant.Position]
+			if currRoom != ant.Path[len(ant.Path)-1] {
+				roomOccupied[currRoom] = true
+			}
+		}
+	}
+	return roomOccupied
 }

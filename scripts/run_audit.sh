@@ -6,7 +6,7 @@ set -eo pipefail
 echo "=========================================="
 echo " Building lem-in executable..."
 echo "=========================================="
-go build -o lem-in .
+go build -o lem-in ./cmd
 if [ $? -ne 0 ]; then
     echo "Error: Failed to build lem-in"
     exit 1

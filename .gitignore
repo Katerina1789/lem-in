@@ -1,2 +1,32 @@
+# Go build artifacts
+/bin/
+/build/
+/dist/
 lem-in
 lem-in.exe
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Go cache / test binaries
+*.test
+*.out
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.temp

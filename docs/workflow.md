@@ -99,7 +99,7 @@ Reads an **ant farm** (a graph of rooms connected by tunnels), moves N ants from
 ║  │  ALGORITHM: Edmonds-Karp (Max-Flow with BFS)                │    ║
 ║  │                                                             │    ║
 ║  │  loop:                                                      │    ║
-║  │    path = FindShortestPath(g, start, end)  ← BFS            │     ║
+║  │    path = FindShortestPath(g, start, end)  ← BFS            │    ║
 ║  │    if path == nil → stop                                    │    ║
 ║  │    augment Flow by 1 on each edge of the path               │    ║
 ║  │    (and decrease the reverse edge for the residual graph)   │    ║
@@ -109,61 +109,61 @@ Reads an **ant farm** (a graph of rooms connected by tunnels), moves N ants from
 ║                                                                     ║
 ║  FindAllDisjointPaths(g) → [][]string                               ║
 ║                                                                     ║
-║  Returns e.g.:  [["a","b","c","d"]]  (only 1 path here)           ║
+║  Returns e.g.:  [["a","b","c","d"]]  (only 1 path here)             ║
 ║                                                                     ║
-║  ┌─────────────────────────────────────────────────────────────┐   ║
-║  │  SelectOptimalPaths(allPaths, antCount) → [][]string        │   ║
-║  │                                                             │   ║
-║  │  Tries k = 1, 2, 3... paths:                               │   ║
-║  │    computeTurns(selected_k, N):                             │   ║
-║  │      binary search for min T such that:                     │   ║
-║  │      Σ max(0, T - len(path_i) + 1) >= N                    │   ║
-║  │    → keeps the k with the min T                             │   ║
-║  └─────────────────────────────────────────────────────────────┘   ║
+║  ┌─────────────────────────────────────────────────────────────┐    ║
+║  │  SelectOptimalPaths(allPaths, antCount) → [][]string        │    ║
+║  │                                                             │    ║
+║  │  Tries k = 1, 2, 3... paths:                                │    ║
+║  │    computeTurns(selected_k, N):                             │    ║
+║  │      binary search for min T such that:                     │    ║
+║  │      Σ max(0, T - len(path_i) + 1) >= N                     │    ║
+║  │    → keeps the k with the min T                             │    ║
+║  └─────────────────────────────────────────────────────────────┘    ║
 ╚══════════════════════════════╤══════════════════════════════════════╝
                                │  [][]string  (optimal paths)
                                ▼
 ╔═════════════════════════════════════════════════════════════════════╗
-║  PHASE 5 — DISTRIBUTION        pkg/scheduler/distributor.go        ║
+║  PHASE 5 — DISTRIBUTION        pkg/scheduler/distributor.go         ║
 ║                                                                     ║
-║  DistributeAnts(paths, numAnts) → []*models.Ant                    ║
+║  DistributeAnts(paths, numAnts) → []*models.Ant                     ║
 ║                                                                     ║
 ║  For each new ant:                                                  ║
-║    cost(path_i) = len(path_i) + assignedCount(path_i)              ║
-║    → assign it to the path with min cost                           ║
+║    cost(path_i) = len(path_i) + assignedCount(path_i)               ║
+║    → assign it to the path with min cost                            ║
 ║                                                                     ║
 ║  Each Ant:                                                          ║
 ║  ┌────────────────────────────┐                                     ║
 ║  │ ID       = 1,2,3,4         │                                     ║
-║  │ Path     = ["b","c","d"]   │  (without start)                   ║
-║  │ Position = -1              │  (-1 = not yet started)            ║
+║  │ Path     = ["b","c","d"]   │  (without start)                    ║
+║  │ Position = -1              │  (-1 = not yet started)             ║
 ║  │ Arrived  = false           │                                     ║
 ║  └────────────────────────────┘                                     ║
 ╚══════════════════════════════╤══════════════════════════════════════╝
                                │  []*models.Ant
                                ▼
 ╔═════════════════════════════════════════════════════════════════════╗
-║  PHASE 5 — SIMULATION          pkg/scheduler/simulator.go          ║
+║  PHASE 5 — SIMULATION          pkg/scheduler/simulator.go           ║
 ║                                                                     ║
-║  Simulate(ants, graph) → []models.Turn                             ║
+║  Simulate(ants, graph) → []models.Turn                              ║
 ║                                                                     ║
 ║  Each turn:                                                         ║
-║  1. roomOccupied = map[string]bool  (which rooms are occupied)     ║
-║  2. For each path, moves front ants first (avoids deadlock —       ║
-║     the rear ant cannot block the front one)                       ║
-║  3. If nextRoom is free (or is end) → move                         ║
-║  4. If Position == -1 and firstRoom is free → start                ║
-║  5. If ant reaches end → Arrived = true                            ║
+║  1. roomOccupied = map[string]bool  (which rooms are occupied)      ║
+║  2. For each path, moves front ants first (avoids deadlock —        ║
+║     the rear ant cannot block the front one)                        ║
+║  3. If nextRoom is free (or is end) → move                          ║
+║  4. If Position == -1 and firstRoom is free → start                 ║
+║  5. If ant reaches end → Arrived = true                             ║
 ║  6. Stops when all Arrived == true                                  ║
 ╚══════════════════════════════╤══════════════════════════════════════╝
                                │  []models.Turn
                                ▼
 ╔═════════════════════════════════════════════════════════════════════╗
-║  PHASE 6 — OUTPUT FORMATTER    pkg/output/formatter.go             ║
+║  PHASE 6 — OUTPUT FORMATTER    pkg/output/formatter.go              ║
 ║                                                                     ║
-║  FormatFileEcho(input)       → echo of the file (1 trailing \n)    ║
-║  FormatTurns(turns)          → "L{id}-{room} ...\n" per Turn       ║
-║  FormatFull(input, turns)    → FileEcho + "\n" + Turns             ║
+║  FormatFileEcho(input)       → echo of the file (1 trailing \n)     ║
+║  FormatTurns(turns)          → "L{id}-{room} ...\n" per Turn        ║
+║  FormatFull(input, turns)    → FileEcho + "\n" + Turns              ║
 ╚══════════════════════════════╤══════════════════════════════════════╝
                                │  string
                                ▼
@@ -212,27 +212,27 @@ string+[]Turn   ──format──►     string             (final output)
 ```
 models.Graph                        models.FlowGraph
 ┌────────────────────────┐          ┌──────────────────────────┐
-│ Rooms  map[string]*Room│          │ Nodes map[string]*FlowNode│
-│ Links  []Link          │          │ Start *FlowNode           │
-│ Adjacency map[string]  │          │ End   *FlowNode           │
+│ Rooms  map[string]*Room│          │Nodes map[string]*FlowNode│
+│ Links  []Link          │          │Start *FlowNode           │
+│ Adjacency map[string]  │          │End   *FlowNode           │
 │          []string      │          └──────────────────────────┘
 └────────────────────────┘
                                     models.FlowNode
 models.Room                         ┌──────────────────────────┐
-┌────────────────────────┐          │ Name     string           │
-│ Name    string         │          │ Original string           │
-│ CoordX  int            │          │ IsIn     bool             │
-│ CoordY  int            │          │ IsOut    bool             │
-│ IsStart bool           │          │ Edges    []*FlowEdge      │
+┌────────────────────────┐          │Name     string           │
+│ Name    string         │          │Original string           │
+│ CoordX  int            │          │IsIn     bool             │
+│ CoordY  int            │          │IsOut    bool             │
+│ IsStart bool           │          │Edges    []*FlowEdge      │
 │ IsEnd   bool           │          └──────────────────────────┘
 │ Neighbors []string     │
 └────────────────────────┘          models.FlowEdge
                                     ┌──────────────────────────┐
-models.Ant                          │ From     *FlowNode        │
-┌────────────────────────┐          │ To       *FlowNode        │
-│ ID       int           │          │ Capacity int              │
-│ Path     []string      │          │ Flow     int              │
-│ Position int (-1=start)│          │ Reverse  *FlowEdge        │
+models.Ant                          │From     *FlowNode        │
+┌────────────────────────┐          │To       *FlowNode        │
+│ ID       int           │          │Capacity int              │
+│ Path     []string      │          │Flow     int              │
+│ Position int (-1=start)│          │Reverse  *FlowEdge        │
 │ Arrived  bool          │          └──────────────────────────┘
 └────────────────────────┘
 

@@ -25,12 +25,6 @@ type Ant struct {
 	Arrived  bool
 }
 
-// Path is a sequence of room names from start to end
-type Path struct {
-	Rooms  []string // includes start and end
-	Length int      // number of edges (len(Rooms)-1)
-}
-
 // Graph is the full colony representation
 type Graph struct {
 	Rooms     map[string]*Room
@@ -46,11 +40,6 @@ type TurnMove struct {
 
 // Turn is a slice of moves for one turn
 type Turn []TurnMove
-
-// Solution holds the complete result
-type Solution struct {
-	Turns []Turn
-}
 
 // FlowGraph represents the split-node graph used for pathfinding
 type FlowGraph struct {

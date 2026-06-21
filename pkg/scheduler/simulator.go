@@ -5,17 +5,7 @@ import (
 	"sort"
 )
 
-/*Simulate distributes ants across paths and simulates the movement of ants.
-
-	Args:
-		ants: A slice of pointers to Ant structs representing the ants to be distributed.
-		graph: A pointer to a Graph struct representing the graph.
-
-	Returns:
-
-	A slice of Turn structs representing the turns taken by the ants.
-*/
-
+// Simulate runs the ant movement simulation turn by turn until all ants reach the end room.
 func Simulate(ants []*models.Ant, graph *models.Graph) []models.Turn {
 	var turns []models.Turn
 
@@ -26,7 +16,6 @@ func Simulate(ants []*models.Ant, graph *models.Graph) []models.Turn {
 
 		currentTurn := models.Turn{}
 		roomOccupied := getOccupiedRooms(ants)
-
 		pathList := getUniquePaths(ants)
 
 		for _, path := range pathList {
@@ -53,6 +42,7 @@ func Simulate(ants []*models.Ant, graph *models.Graph) []models.Turn {
 	return turns
 }
 
+// equalPaths reports whether two path slices contain the same rooms in the same order.
 func equalPaths(a, b []string) bool {
 	if len(a) != len(b) {
 		return false
@@ -65,6 +55,7 @@ func equalPaths(a, b []string) bool {
 	return true
 }
 
+// allAntsArrived reports whether every ant has reached the end room.
 func allAntsArrived(ants []*models.Ant) bool {
 	for _, ant := range ants {
 		if !ant.Arrived {
@@ -74,12 +65,14 @@ func allAntsArrived(ants []*models.Ant) bool {
 	return true
 }
 
+// getOccupiedRooms returns a set of room names currently occupied by ants that are
+// in transit (not at the end room and not yet launched).
 func getOccupiedRooms(ants []*models.Ant) map[string]bool {
 	roomOccupied := make(map[string]bool)
 	for _, ant := range ants {
 		if !ant.Arrived && ant.Position >= 0 {
 			currRoom := ant.Path[ant.Position]
-			if currRoom != ant.Path[len(ant.Path)-1] {
+			if currRoom != ant.Path[len(ant.Path)-1] { // exclude ants sitting at the end room
 				roomOccupied[currRoom] = true
 			}
 		}
@@ -87,6 +80,7 @@ func getOccupiedRooms(ants []*models.Ant) map[string]bool {
 	return roomOccupied
 }
 
+// getUniquePaths returns one entry per distinct path found among the given ants.
 func getUniquePaths(ants []*models.Ant) [][]string {
 	var pathList [][]string
 	for _, ant := range ants {
@@ -104,6 +98,8 @@ func getUniquePaths(ants []*models.Ant) [][]string {
 	return pathList
 }
 
+// getSortedAntsOnPath returns all ants assigned to path, sorted front-to-back by position
+// so that leading ants are moved first and cannot be blocked by ants behind them.
 func getSortedAntsOnPath(ants []*models.Ant, path []string) []*models.Ant {
 	var pathAnts []*models.Ant
 	for _, ant := range ants {
@@ -112,11 +108,12 @@ func getSortedAntsOnPath(ants []*models.Ant, path []string) []*models.Ant {
 		}
 	}
 	sort.Slice(pathAnts, func(i, j int) bool {
-		return pathAnts[i].Position > pathAnts[j].Position
+		return pathAnts[i].Position > pathAnts[j].Position // higher position = closer to end
 	})
 	return pathAnts
 }
 
+// moveActiveAnts advances each in-transit ant one step along its path if the next room is free.
 func moveActiveAnts(pathAnts []*models.Ant, roomOccupied map[string]bool) []models.TurnMove {
 	var moves []models.TurnMove
 	for i := 0; i < len(pathAnts); i++ {
@@ -140,18 +137,16 @@ func moveActiveAnts(pathAnts []*models.Ant, roomOccupied map[string]bool) []mode
 				roomOccupied[nextRoom] = true
 			}
 
-			moves = append(moves, models.TurnMove{
-				AntID: ant.ID,
-				Room:  nextRoom,
-			})
+			moves = append(moves, models.TurnMove{AntID: ant.ID, Room: nextRoom})
 		}
 	}
 	return moves
 }
 
+// launchNewAnt starts the first waiting ant on path if the path's first room is free.
 func launchNewAnt(pathAnts []*models.Ant, path []string, roomOccupied map[string]bool) *models.TurnMove {
 	firstRoom := path[0]
-	isFirstRoomEnd := len(path) == 1
+	isFirstRoomEnd := len(path) == 1 // path goes directly start→end
 	if isFirstRoomEnd || !roomOccupied[firstRoom] {
 		var inactiveAnt *models.Ant
 		for _, ant := range pathAnts {
@@ -169,10 +164,7 @@ func launchNewAnt(pathAnts []*models.Ant, path []string, roomOccupied map[string
 				roomOccupied[firstRoom] = true
 			}
 
-			return &models.TurnMove{
-				AntID: inactiveAnt.ID,
-				Room:  firstRoom,
-			}
+			return &models.TurnMove{AntID: inactiveAnt.ID, Room: firstRoom}
 		}
 	}
 	return nil

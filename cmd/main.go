@@ -20,7 +20,6 @@ func main() {
 
 	path := os.Args[1]
 
-	// Phase 1: Parse file
 	raw, err := parser.ReadFile(path)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "ERROR: invalid data format")
@@ -31,14 +30,12 @@ func main() {
 	lines = parser.FilterComments(lines)
 	lines = parser.TrimWhitespace(lines)
 
-	// Phase 2: Validate
 	g, antCount, err := validator.Validate(lines)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "ERROR: invalid data format")
 		os.Exit(1)
 	}
 
-	// Verify connectivity
 	var startName, endName string
 	for name, room := range g.Rooms {
 		if room.IsStart {
@@ -53,7 +50,6 @@ func main() {
 		os.Exit(1)
 	}
 
-	// Phase 3 & 4: Pathfinding on split flow graph
 	flowGraph := graph.SplitForFlow(g)
 	allPaths := pathfinder.FindAllDisjointPaths(flowGraph)
 	optimalPaths := pathfinder.SelectOptimalPaths(allPaths, antCount)
@@ -62,11 +58,8 @@ func main() {
 		os.Exit(1)
 	}
 
-	// Phase 5: Distribution and simulation
 	ants := scheduler.DistributeAnts(optimalPaths, antCount)
 	turns := scheduler.Simulate(ants, g)
 
-	// Phase 6: Formatting and output
-	formatted := output.FormatFull(raw, turns)
-	fmt.Print(formatted)
+	fmt.Print(output.FormatFull(raw, turns))
 }

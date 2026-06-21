@@ -1,7 +1,3 @@
-/*
-Package scheduler implements the distributor algorithm to distribute ants across paths.
-*/
-
 package scheduler
 
 import (
@@ -9,6 +5,9 @@ import (
 	"sort"
 )
 
+// DistributeAnts assigns each of the numAnts ants to one of the given paths using a
+// greedy min-cost strategy: each ant goes to the path with the lowest current cost
+// (path length + number of ants already assigned to it).
 func DistributeAnts(paths [][]string, numAnts int) []*models.Ant {
 	if len(paths) == 0 || numAnts <= 0 {
 		return nil
@@ -45,7 +44,7 @@ func DistributeAnts(paths [][]string, numAnts int) []*models.Ant {
 	for antIdx < numAnts {
 		for p := range paths {
 			if assignedCounts[p] > 0 {
-				ants[antIdx].Path = paths[p][1:]
+				ants[antIdx].Path = paths[p][1:] // store path without the start room
 				assignedCounts[p]--
 				antIdx++
 				if antIdx >= numAnts {

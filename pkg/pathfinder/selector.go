@@ -2,6 +2,8 @@ package pathfinder
 
 import "sort"
 
+// SelectOptimalPaths picks the subset of allPaths that minimises the number of turns
+// needed to move antCount ants from start to end.
 func SelectOptimalPaths(allPaths [][]string, antCount int) [][]string {
 	if len(allPaths) == 0 || antCount <= 0 {
 		return nil
@@ -26,6 +28,8 @@ func SelectOptimalPaths(allPaths [][]string, antCount int) [][]string {
 	return bestPaths
 }
 
+// computeTurns returns the minimum number of turns needed to move antCount ants
+// through the given set of paths using binary search.
 func computeTurns(paths [][]string, antCount int) int {
 	lengths := make([]int, len(paths))
 	maxL := 0
@@ -44,7 +48,7 @@ func computeTurns(paths [][]string, antCount int) int {
 		capacity := 0
 		for _, L := range lengths {
 			if mid >= L {
-				capacity += mid - L + 1
+				capacity += mid - L + 1 // ants that can finish path L within T=mid turns
 			}
 		}
 		if capacity >= antCount {

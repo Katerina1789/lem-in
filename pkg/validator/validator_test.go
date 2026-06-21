@@ -185,7 +185,7 @@ func TestValidateRooms(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			rooms, start, end, _, err := validateRooms(tt.lines, 0)
+			rooms, _, err := validateRooms(tt.lines, 0)
 			if tt.expectErr && err == nil {
 				t.Errorf("expected error, got nil")
 			}
@@ -193,7 +193,16 @@ func TestValidateRooms(t *testing.T) {
 				if err != nil {
 					t.Errorf("unexpected error: %v", err)
 				}
-				if start == "" || end == "" {
+				hasStart, hasEnd := false, false
+				for _, r := range rooms {
+					if r.IsStart {
+						hasStart = true
+					}
+					if r.IsEnd {
+						hasEnd = true
+					}
+				}
+				if !hasStart || !hasEnd {
 					t.Errorf("start or end room not set")
 				}
 				if len(rooms) < 2 {

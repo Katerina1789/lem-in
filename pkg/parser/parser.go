@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-// ReadFile reads the entire file and returns its contents as a string.
+// ReadFile reads the entire file at path and returns its contents as a string.
 func ReadFile(path string) (string, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
@@ -14,38 +14,32 @@ func ReadFile(path string) (string, error) {
 	return string(data), nil
 }
 
-// SplitLines splits the raw string by newlines and removes carriage returns.
+// SplitLines splits raw input by newlines and strips carriage returns from each line.
 func SplitLines(raw string) []string {
-	// Split by \n
 	lines := strings.Split(raw, "\n")
-	// Trim \r from each line
 	for i := range lines {
-		lines[i] = strings.TrimSuffix(lines[i], "\r")
+		lines[i] = strings.TrimSuffix(lines[i], "\r") // strip \r for Windows line endings
 	}
 	return lines
 }
 
-// FilterComments removes lines starting with '#' that are NOT '##start' or '##end'.
-// Lines starting with '##' that are not '##start' or '##end' are also ignored.
+// FilterComments removes comment lines (starting with '#') while keeping ##start and ##end directives.
 func FilterComments(lines []string) []string {
 	var result []string
 	for _, line := range lines {
 		trimmed := strings.TrimLeft(line, " \t")
-		// Keep lines that don't start with '#'
-		if !strings.HasPrefix(trimmed, "#") {
+		if !strings.HasPrefix(trimmed, "#") { // not a comment, keep it
 			result = append(result, line)
 			continue
 		}
-		// If it starts with '#', only keep ##start or ##end
-		if trimmed == "##start" || trimmed == "##end" {
+		if trimmed == "##start" || trimmed == "##end" { // directives are not comments
 			result = append(result, line)
 		}
-		// Otherwise, skip it (it's a comment)
 	}
 	return result
 }
 
-// TrimWhitespace trims leading/trailing whitespace from each line and removes empty lines.
+// TrimWhitespace trims leading/trailing whitespace from each line and removes blank lines.
 func TrimWhitespace(lines []string) []string {
 	var result []string
 	for _, line := range lines {
